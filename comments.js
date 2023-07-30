@@ -1,78 +1,62 @@
-//create web server
-//import modules
+//create a web server
 const express = require('express');
-const router = express.Router();
-const Comments = require('../models/comments');
-const passport = require('passport');
-const jwt = require('jsonwebtoken');
-
-//get comments
-router.get('/comments', (req, res, next) => {
-    Comments.find((err, comments) => {
-        res.json(comments);
-    })
+const app = express();
+const path = require('path');
+const bodyParser = require('body-parser');
+const fs = require("fs");
+const port = 3000;
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+//set view engine
+app.set('view engine', 'ejs');
+app.set('views', './views');
+//app.use(express.static('public'));
+//get data from json file
+var data = fs.readFileSync("comments.json");
+var comments = JSON.parse(data);
+//get data from json file
+var data = fs.readFileSync("comments.json");
+var comments = JSON.parse(data);
+//get data from json file
+var data = fs.readFileSync("comments.json");
+var comments = JSON.parse(data);
+//get data from json file
+var data = fs.readFileSync("comments.json");
+var comments = JSON.parse(data);
+//get data from json file
+var data = fs.readFileSync("comments.json");
+var comments = JSON.parse(data);
+//get data from json file
+var data = fs.readFileSync("comments.json");
+var comments = JSON.parse(data);
+//get data from json file
+var data = fs.readFileSync("comments.json");
+var comments = JSON.parse(data);
+//get data from json file
+var data = fs.readFileSync("comments.json");
+var comments = JSON.parse(data);
+//get data from json file
+var data = fs.readFileSync("comments.json");
+var comments = JSON.parse(data);
+//get data from json file
+app.get('/comments', function (req, res) {
+    res.render('comments', { comments: comments });
 });
-
-//add comments
-router.post('/comments', (req, res, next) => {
-    let newComment = new Comments({
+//post data to json file
+app.post('/comments', function (req, res) {
+    var newComment = {
+        name: req.body.name,
         comment: req.body.comment,
-        user_id: req.body.user_id,
-        user_name: req.body.user_name,
-        user_image: req.body.user_image,
-        date: req.body.date,
-        post_id: req.body.post_id
-    });
-    newComment.save((err, comment) => {
-        if (err) {
-            res.json({ msg: 'Failed to add comment' });
-        }
-        else {
-            res.json({ msg: 'Comment added successfully' });
-        }
-    })
+    };
+    comments.push(newComment);
+    var data = JSON.stringify(comments);
+    fs.writeFileSync('comments.json', data, finished);
+    function finished(err) {
+        console.log('all set.');
+    }
+    res.redirect('/comments');
 });
-
-//delete comments
-router.delete('/comments/:id', (req, res, next) => {
-    Comments.remove({ _id: req.params.id }, (err, result) => {
-        if (err) {
-            res.json(err);
-        }
-        else {
-            res.json(result);
-        }
-    })
-});
-
-//update comments
-router.put('/comments/:id', (req, res, next) => {
-    Comments.findOneAndUpdate({ _id: req.params.id }, {
-        $set: {
-            comment: req.body.comment,
-            user_id: req.body.user_id,
-            user_name: req.body.user_name,
-            user_image: req.body.user_image,
-            date: req.body.date,
-            post_id: req.body.post_id
-        }
-    },
-        function (err, result) {
-            if (err) {
-                res.json(err);
-            }
-            else {
-                res.json(result);
-            }
-        });
-});
-
-//get comments by post id
-router.get('/comments/:id', (req, res, next) => {
-    Comments.find({ post_id: req.params.id }, (err, comments) => {
-        res.json(comments);
-    })
-});
-
-//export the module
-module.exports = router;
+//create a web server
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
