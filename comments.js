@@ -1,62 +1,64 @@
-//create a web server
-const express = require('express');
-const app = express();
-const path = require('path');
-const bodyParser = require('body-parser');
-const fs = require("fs");
-const port = 3000;
-const publicPath = path.join(__dirname, '../public');
-app.use(express.static(publicPath));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-//set view engine
-app.set('view engine', 'ejs');
-app.set('views', './views');
-//app.use(express.static('public'));
-//get data from json file
-var data = fs.readFileSync("comments.json");
-var comments = JSON.parse(data);
-//get data from json file
-var data = fs.readFileSync("comments.json");
-var comments = JSON.parse(data);
-//get data from json file
-var data = fs.readFileSync("comments.json");
-var comments = JSON.parse(data);
-//get data from json file
-var data = fs.readFileSync("comments.json");
-var comments = JSON.parse(data);
-//get data from json file
-var data = fs.readFileSync("comments.json");
-var comments = JSON.parse(data);
-//get data from json file
-var data = fs.readFileSync("comments.json");
-var comments = JSON.parse(data);
-//get data from json file
-var data = fs.readFileSync("comments.json");
-var comments = JSON.parse(data);
-//get data from json file
-var data = fs.readFileSync("comments.json");
-var comments = JSON.parse(data);
-//get data from json file
-var data = fs.readFileSync("comments.json");
-var comments = JSON.parse(data);
-//get data from json file
-app.get('/comments', function (req, res) {
-    res.render('comments', { comments: comments });
-});
-//post data to json file
-app.post('/comments', function (req, res) {
-    var newComment = {
-        name: req.body.name,
-        comment: req.body.comment,
-    };
-    comments.push(newComment);
-    var data = JSON.stringify(comments);
-    fs.writeFileSync('comments.json', data, finished);
-    function finished(err) {
-        console.log('all set.');
+// Create web server
+var express = require('express');
+var router = express.Router();
+
+// Import the Comment model
+var Comment = require('../models/comment');
+
+// GET /comments
+router.get('/', function(req, res, next) {
+  // Retrieve all comments
+  Comment.find(function(err, comments) {
+    if (err) {
+      return next(err);
     }
-    res.redirect('/comments');
+    // Send back the list of comments
+    res.json(comments);
+  });
 });
-//create a web server
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
+// POST /comments
+router.post('/', function(req, res, next) {
+  // Create a new comment based on the form fields
+  var comment = new Comment(req.body);
+  // Save it into the DB
+  comment.save(function(err, comment) {
+    if (err) {
+      return next(err);
+    }
+    // Send back the newly created comment
+    res.status(201).json(comment);
+  });
+});
+
+// PUT /comments/:id
+router.put('/:id', function(req, res, next) {
+  // Retrieve the comment by its ID
+  Comment.findById(req.params.id, function(err, comment) {
+    if (err) {
+      return next(err);
+    }
+    // Update the comment
+    comment.update(req.body, function(err, numberAffected, rawResponse) {
+      if (err) {
+        return next(err);
+      }
+      // Send back the updated comment
+      res.json(comment);
+    });
+  });
+});
+
+// DELETE /comments/:id
+router.delete('/:id', function(req, res, next) {
+  // Delete the comment by its ID
+  Comment.findByIdAndRemove(req.params.id, function(err, comment) {
+    if (err) {
+      return next(err);
+    }
+    // Send back the deleted comment
+    res.json(comment);
+  });
+});
+
+module.exports = router;
