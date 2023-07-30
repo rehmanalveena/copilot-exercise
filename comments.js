@@ -1,32 +1,78 @@
 //create web server
-var express = require('express');
-var router = express.Router();
+//import modules
+const express = require('express');
+const router = express.Router();
+const Comments = require('../models/comments');
+const passport = require('passport');
+const jwt = require('jsonwebtoken');
 
-//import comments controller
-var commentsController = require('../controllers/commentsController.js');
+//get comments
+router.get('/comments', (req, res, next) => {
+    Comments.find((err, comments) => {
+        res.json(comments);
+    })
+});
 
-// GET request to display comments
-router.get('/', commentsController.comments_list);
+//add comments
+router.post('/comments', (req, res, next) => {
+    let newComment = new Comments({
+        comment: req.body.comment,
+        user_id: req.body.user_id,
+        user_name: req.body.user_name,
+        user_image: req.body.user_image,
+        date: req.body.date,
+        post_id: req.body.post_id
+    });
+    newComment.save((err, comment) => {
+        if (err) {
+            res.json({ msg: 'Failed to add comment' });
+        }
+        else {
+            res.json({ msg: 'Comment added successfully' });
+        }
+    })
+});
 
-// GET request for creating comments
-router.get('/create', commentsController.comments_create_get);
+//delete comments
+router.delete('/comments/:id', (req, res, next) => {
+    Comments.remove({ _id: req.params.id }, (err, result) => {
+        if (err) {
+            res.json(err);
+        }
+        else {
+            res.json(result);
+        }
+    })
+});
 
-// POST request for creating comments
-router.post('/create', commentsController.comments_create_post);
+//update comments
+router.put('/comments/:id', (req, res, next) => {
+    Comments.findOneAndUpdate({ _id: req.params.id }, {
+        $set: {
+            comment: req.body.comment,
+            user_id: req.body.user_id,
+            user_name: req.body.user_name,
+            user_image: req.body.user_image,
+            date: req.body.date,
+            post_id: req.body.post_id
+        }
+    },
+        function (err, result) {
+            if (err) {
+                res.json(err);
+            }
+            else {
+                res.json(result);
+            }
+        });
+});
 
-// GET request to delete comments
-router.get('/:id/delete', commentsController.comments_delete_get);
+//get comments by post id
+router.get('/comments/:id', (req, res, next) => {
+    Comments.find({ post_id: req.params.id }, (err, comments) => {
+        res.json(comments);
+    })
+});
 
-// POST request to delete comments
-router.post('/:id/delete', commentsController.comments_delete_post);
-
-// GET request to update comments
-router.get('/:id/update', commentsController.comments_update_get);
-
-// POST request to update comments
-router.post('/:id/update', commentsController.comments_update_post);
-
-// GET request to display specific comments
-router.get('/:id', commentsController.comments_detail);
-
+//export the module
 module.exports = router;
